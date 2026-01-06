@@ -1,7 +1,9 @@
 import express from "express";
+import dotenv from "dotenv";
+
 import { connectDB } from "./config/db.js";
 import userRoutes from "./routes/user.routes.js";
-import dotenv from "dotenv";
+import classRoutes from "./routes/class.routes.js";
 
 dotenv.config();
 
@@ -14,6 +16,7 @@ app.use(express.json());
 connectDB();
 
 app.use("/auth", userRoutes);
+app.use("/class", classRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "hellooo" });

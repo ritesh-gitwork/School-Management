@@ -19,7 +19,7 @@ export const verifyMiddleware = async (req, res, next) => {
   } catch (error) {
     res.status(401).json({
       success: false,
-      message: "error in middleware",
+      message: "Unauthorized, token missing or invalid",
     });
   }
 };

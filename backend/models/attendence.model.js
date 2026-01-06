@@ -6,7 +6,7 @@ const attendenceShema = new Schema({
     ref: "Class",
     required: true,
   },
-  studenId: {
+  studentId: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,

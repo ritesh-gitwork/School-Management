@@ -1,5 +1,9 @@
-export const techerOnly = async (req, res, next) => {
-  try {
-    // if(req.user==role)
-  } catch (error) {}
+export const teacherOnly = async (req, res, next) => {
+  if (req.user.role !== "teacher") {
+    return res.status(403).json({
+      success: false,
+      error: "Forbidden, teacher access required",
+    });
+  }
+  next();
 };
