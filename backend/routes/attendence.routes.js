@@ -1,0 +1,15 @@
+import express from "express"
+import { verifyMiddleware } from "../middlewares/auth.middleware.js"
+import { teacherOnly } from "../middlewares/role.middleware.js"
+import { validate } from "../middlewares/validate.middleware.js"
+import { attendanceSchema } from "../validators/attendence.schema.js"
+import { getAttendenceByClass, markAttendance } from "../controller/attendence.controller.js"
+
+
+
+const router = express.Router();
+
+router.post("/mark",verifyMiddleware,teacherOnly,validate(attendanceSchema),markAttendance);
+router.get("/class/:classId",verifyMiddleware,getAttendenceByClass)
+
+export default router;
