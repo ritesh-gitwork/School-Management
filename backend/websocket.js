@@ -1,13 +1,13 @@
 import { WebSocketServer, WebSocket } from "ws";
 import jwt from "jsonwebtoken";
 
-import Attendence from "./models/attendence.model.js"
-import Class from "./models/class.model.js"
+import Attendence from "./models/attendence.model.js";
+import Class from "./models/class.model.js";
+import User from "./models/user.model.js";
 
 let isClassLive = false;
 let liveClassTeacherId = null;
 const presentStudents = new Set(); // studentId strings
-
 
 let wss;
 
@@ -75,7 +75,10 @@ export const initWebsocket = (server) => {
           }
 
           //  stop class teacher only and save attendence
+          
+          // ================= STOP CLASS =================
           if (data.type === "STOP_CLASS") {
+            // ✅ 1. AUTH CHECK FIRST
             if (
               ws.user.role !== "teacher" ||
               ws.user.id !== liveClassTeacherId
@@ -89,34 +92,41 @@ export const initWebsocket = (server) => {
               return;
             }
 
+            // ✅ 2. FETCH CLASS
+            const classData = await Class.findOne({
+              teacherId: ws.user.id,
+            }).populate("studentsIds");
 
-
-            // fetch class 
-            const classData = await Class.findOne({teacherId:ws.user.id})
-
-            if(!classData){
-                ws.send(JSON.stringify({
-                    success:false,
-                    error:"Class not found"
-                }));
-                return;
+            if (!classData) {
+              ws.send(
+                JSON.stringify({
+                  success: false,
+                  error: "Class not found",
+                }),
+              );
+              return;
             }
 
-            // prepare attendence
-            const attendanceRecords =classData.studentsIds.map((studentId)=>({
-                classId:classData._id,
-                studentId,
-                status:presentStudents.has(studentId.toString())?"present":"absent",
+            // ✅ 3. PREPARE ATTENDANCE
+            const attendanceRecords = classData.studentsIds.map((student) => ({
+              classId: classData._id,
+              studentId: student._id,
+              status: presentStudents.has(student._id.toString())
+                ? "present"
+                : "absent",
             }));
 
+            // ✅ 4. SAVE ONCE
             await Attendence.insertMany(attendanceRecords);
 
-            // reset state
+            console.log("Attendance saved to DB");
 
+            // ✅ 5. RESET STATE
             isClassLive = false;
             liveClassTeacherId = null;
             presentStudents.clear();
 
+            // ✅ 6. BROADCAST STOP
             wss.clients.forEach((client) => {
               if (client.readyState === WebSocket.OPEN) {
                 client.send(
@@ -126,9 +136,6 @@ export const initWebsocket = (server) => {
                 );
               }
             });
-
-            console.log("attendence saved to DB");
-            
 
             return;
           }
@@ -166,6 +173,11 @@ export const initWebsocket = (server) => {
               }),
             );
 
+            // fetch student name and email
+            const student = await User.findById(ws.user.id).select(
+              "name email",
+            );
+
             // notify teacher(s)
             wss.clients.forEach((client) => {
               if (
@@ -175,7 +187,11 @@ export const initWebsocket = (server) => {
                 client.send(
                   JSON.stringify({
                     type: "STUDENT_PRESENT",
-                    studentId: ws.user.id,
+                    student: {
+                      id: student.id,
+                      name: student.name,
+                      email: student.email,
+                    },
                   }),
                 );
               }
@@ -192,17 +208,18 @@ export const initWebsocket = (server) => {
             }),
           );
         } catch (err) {
-          ws.send(JSON.stringify({
-            success: false,
-            error: "Invalid message format",
-          }));
+          ws.send(
+            JSON.stringify({
+              success: false,
+              error: "Invalid message format",
+            }),
+          );
         }
       });
 
       ws.on("close", () => {
         console.log("WS disconnected:", ws.user?.id);
       });
-
     } catch (error) {
       ws.close(1008, "Invalid token");
     }

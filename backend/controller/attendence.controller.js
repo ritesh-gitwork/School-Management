@@ -111,3 +111,30 @@ export const getAttendenceByClass = async(req,res)=>{
     
 
 }
+
+export const getAttendanceHistory = async (req, res) => {
+  const { classId } = req.params;
+
+  const records = await Attendance.find({ classId })
+    .populate("studentId", "name email")
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    data: records,
+  });
+};
+
+
+export const getMyAttendance = async (req, res) => {
+  const records = await Attendance.find({
+    studentId: req.user.id,
+  })
+    .populate("classId", "className")
+    .sort({ createdAt: -1 });
+
+  res.json({
+    success: true,
+    data: records,
+  });
+};

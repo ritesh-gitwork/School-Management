@@ -117,3 +117,21 @@ export const addStudentClass = async (req, res) => {
     });
   }
 };
+
+export const getClassById = async (req, res) => {
+  const classData = await Class.findById(req.params.id)
+    .populate("studentsIds", "name email");
+
+  if (!classData) {
+    return res.status(404).json({
+      success: false,
+      error: "Class not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: classData,
+  });
+};
+

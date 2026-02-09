@@ -16,7 +16,12 @@ const attendenceShema = new Schema({
     enum: ["present", "absent"],
     required: true,
   },
-});
+  date: {
+      type: Date,
+      default: Date.now,
+    },
+},
+{timestamps:true});
 
 const Attendence = mongoose.model("Attendence", attendenceShema);
 
