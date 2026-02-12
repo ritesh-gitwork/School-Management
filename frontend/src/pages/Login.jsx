@@ -16,7 +16,6 @@ const Login = () => {
         password,
       });
 
-      console.log("LOGIN RESPONSE 👉", res.data);
 
       const { token, user } = res.data;
 
@@ -42,15 +41,15 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
+    <div style={{display:"flex",flexDirection:"column",padding:"40px",boxSizing:"border-box"}}>
+      <h2>Sign in</h2>
 
-      <input
+      <input style={{padding:"5px",marginBottom:"10px"}}
         placeholder="Email"
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <input
+      <input style={{padding:"5px",marginBottom:"10px"}}
         type="password"
         placeholder="Password"
         onChange={(e) => setPassword(e.target.value)}
