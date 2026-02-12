@@ -27,39 +27,33 @@ const Signup = () => {
   };
 
   return (
-    <div>
-      <h2>Signup</h2>
+    <div className="login-container">
+      <div className="login-card">
+        <h2>Signup</h2>
 
-      <input
-        placeholder="Name"
-        onChange={(e) => setName(e.target.value)}
-      />
-      <br />
-      <br />
+        <form onSubmit={handleSignup}>
 
-      <input
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <br />
-      <br />
 
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <br />
-      <br />
+        <input placeholder="Name" onChange={(e) => setName(e.target.value)} />
+        
 
-      <select onChange={(e) => setRole(e.target.value)}>
-        <option value="student">Student</option>
-        <option value="teacher">Teacher</option>
-      </select>
-      <br />
-      <br />
+        <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+        
 
-      <button onClick={handleSignup}>Signup</button>
+        <input
+          type="password"
+          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+          />
+
+        <select onChange={(e) => setRole(e.target.value)}>
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+        </select>
+
+        <button type="submit">Signup</button>
+          </form>
+      </div>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
+import "./Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -9,53 +10,66 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
     try {
       const res = await api.post("/auth/login", {
         email,
         password,
       });
 
-
       const { token, user } = res.data;
 
-      // 🔴 SAFETY CHECK
       if (!token || !user) {
         alert("Invalid login response");
         return;
       }
 
-      // ✅ save auth
       login(token, user);
 
-      // ✅ redirect (ABSOLUTE PATH)
       if (user.role === "teacher") {
         navigate("/teacher/dashboard", { replace: true });
       } else {
         navigate("/student/dashboard", { replace: true });
       }
-
     } catch (err) {
       alert(err.response?.data?.error || "Login failed");
     }
   };
 
   return (
-    <div style={{display:"flex",flexDirection:"column",padding:"40px",boxSizing:"border-box"}}>
-      <h2>Sign in</h2>
+    <div className="login-container">
+      <div className="login-card">
+        <h2>Sign in</h2>
 
-      <input style={{padding:"5px",marginBottom:"10px"}}
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-      <input style={{padding:"5px",marginBottom:"10px"}}
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-      <button onClick={handleLogin}>Login</button>
+          <button type="submit">Sign in</button>
+        </form>
+
+        <p
+          className="signup-link"
+          onClick={() => navigate("/auth/signup")}
+        >
+          Sign Up
+        </p>
+      </div>
     </div>
   );
 };
