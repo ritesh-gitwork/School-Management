@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import "./Signup.css"
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -10,7 +11,8 @@ const Signup = () => {
 
   const navigate = useNavigate();
 
-  const handleSignup = async () => {
+  const handleSignup = async (e) => {
+    e.preventDefault()
     try {
       await api.post("/auth/signup", {
         name,
@@ -19,25 +21,26 @@ const Signup = () => {
         role,
       });
 
-      alert("Signup successful, please login");
-      navigate("/login");
+      navigate("/login",{
+        state:{signupSuccess:true},
+      })
     } catch (err) {
       alert(err.response?.data?.error || "Signup failed");
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
+    <div className="signup-container">
+      <div className="signup-card">
         <h2>Signup</h2>
 
         <form onSubmit={handleSignup}>
 
 
-        <input placeholder="Name" onChange={(e) => setName(e.target.value)} />
+        <input type="name" placeholder="Name" onChange={(e) => setName(e.target.value)} />
         
 
-        <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+        <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
         
 
         <input

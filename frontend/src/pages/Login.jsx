@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
-import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 const Login = () => {
@@ -9,6 +10,18 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showMessage, setShowMessage] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.signupSuccess) {
+      setShowMessage(true);
+
+      setTimeout(() => {
+        setShowMessage(false);
+      }, 3000);
+    }
+  }, [location.state]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -40,6 +53,9 @@ const Login = () => {
 
   return (
     <div className="login-container">
+      {showMessage && (
+        <div className="toast-success">Signup Successful. Please Login</div>
+      )}
       <div className="login-card">
         <h2>Sign in</h2>
 
@@ -63,10 +79,7 @@ const Login = () => {
           <button type="submit">Sign in</button>
         </form>
 
-        <p
-          className="signup-link"
-          onClick={() => navigate("/auth/signup")}
-        >
+        <p className="signup-link" onClick={() => navigate("/auth/signup")}>
           Sign Up
         </p>
       </div>
