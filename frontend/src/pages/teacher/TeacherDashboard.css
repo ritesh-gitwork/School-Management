@@ -1,0 +1,150 @@
+.dashboard-container {
+  padding: 20px;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+/* .dashboard-header h2 {
+  background: linear-gradient(135deg, #0AC4E0, #008db3);
+  color: white;
+  padding: 10px 25px;
+  border-radius: 30px;
+  margin: 0;
+} */
+
+/* Add Class */
+.add-class input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.add-class button {
+  padding: 8px 15px;
+  margin-left: 10px;
+  border: none;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.add-class button:hover {
+  background-color: #1d4ed8;
+}
+
+/* Search */
+.search-box {
+  margin-bottom: 15px;
+}
+
+.search-box input {
+  width: 250px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* Card */
+.class-card {
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: linear-gradient(135deg, #f4f6f9, #e5eaf2);
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+}
+
+tbody tr {
+  transition: 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: #f1f5ff;
+}
+
+/* Buttons */
+.btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: white;
+  font-size: 14px;
+}
+
+.btn.manage {
+  background-color: #2563eb;
+}
+
+.btn.live {
+  background-color: #10b981;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+/* Badge */
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.badge.active {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+/* Pagination */
+.pagination {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 6px 12px;
+  border: none;
+  background: #e5e7eb;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.pagination .active-page {
+  background-color: #2563eb;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  table {
+    font-size: 14px;
+  }
+}
+
+

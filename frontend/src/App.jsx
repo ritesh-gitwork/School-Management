@@ -17,6 +17,7 @@ import AttendanceHistory from "./pages/teacher/AttendanceHistory";
 import StudentDashboard from "./pages/student/Dashboard";
 import StudentLiveClass from "./pages/student/LiveClass";
 import AttendanceHistoryforSTD from "./pages/student/AttendanceHistoryforSTD";
+import TeacherLayout from "./layouts/TeacherLayouts";
 
 function App() {
   return (
@@ -33,14 +34,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/auth/signup" element={<Signup />} />
 
-          <Route
-            path="/teacher/dashboard"
-            element={
-              <ProtectedRoute role="teacher">
-                <TeacherDashboard />
-              </ProtectedRoute>
-            }
-          />
+           
           <Route
             path="/teacher/class/:classId/live"
             element={
@@ -67,6 +61,22 @@ function App() {
             }
           />
 
+          <Route
+            path="/teacher"
+            element={
+              <ProtectedRoute role="teacher">
+                <TeacherLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<TeacherDashboard />} />
+            <Route path="class/:classId/live" element={<LiveClass />} />
+            <Route
+              path="class/:classId/attendance"
+              element={<AttendanceHistory />}
+            />
+            <Route path="class/:classId/students" element={<AddStudent />} />
+          </Route>
           <Route
             path="/student/class/:classId/live"
             element={

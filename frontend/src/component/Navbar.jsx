@@ -66,8 +66,12 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "12px 40px",
-    backgroundColor: "#1e3a8a",
+    border:"none",
+    borderRadius:"10px",
+    backgroundColor: "#0B2D72",
+    margin:"2px",
     color: "white",
+    
   },
   leftSection: {
     display: "flex",

@@ -3,9 +3,21 @@ import User from "../models/user.model.js";
 
 export const createClass = async (req, res) => {
   try {
-    const { className } = req.body;
+    let { className } = req.body;
 
-    const existingClass = await Class.findOne({ className });
+    if(!className){
+      return res.status(400).json({
+        success:"false",
+        message:"Class Name Required"
+      })
+    }
+
+    const teacherId = req.user.id;
+    const normalised =className.trim().toLowerCase()
+
+    const existingClass = await Class.findOne({
+       className:normalised,teacherId
+      });
 
     if (existingClass) {
       return res.status(400).json({
@@ -14,10 +26,9 @@ export const createClass = async (req, res) => {
       });
     }
 
-    const teacherId = req.user.id;
 
     const newClass = await Class.create({
-      className,
+      className:normalised,
       teacherId,
       studentsIds: [],
     });
@@ -27,6 +38,13 @@ export const createClass = async (req, res) => {
       data: newClass,
     });
   } catch (error) {
+    if(error.code === 11000){
+      return res.status(400).json({
+        status:"false",
+        message:"Class Already Exits"
+      })
+    }
+    
     console.error("create class error : ", error);
 
     return res.status(500).json({

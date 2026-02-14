@@ -25,6 +25,8 @@ const classSchema = new Schema(
   }
 );
 
+classSchema.index({ className: 1, teacherId: 1 }, { unique: true });
 const Class = mongoose.model("Class", classSchema);
+
 
 export default Class;

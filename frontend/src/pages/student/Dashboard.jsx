@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import NameHeader from "../../component/NameHeader";
 
 const StudentDashboard = () => {
   const [classes, setClasses] = useState([]);
@@ -14,6 +15,7 @@ const StudentDashboard = () => {
   return (
     <div style={{ padding: 20 }}>
       <h2>Student Dashboard</h2>
+      <NameHeader/>
 
       <ul>
         {classes.map((cls) => (
