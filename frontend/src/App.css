@@ -123,3 +123,51 @@
 .table-btn:hover {
   opacity: 0.85;
 }
+
+
+/* sidebar css for teacher*/
+
+.sidebar {
+  width: 240px;
+  background-color: #1e3a8a;
+  color: white;
+  transition: 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.menu-item {
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.menu-item:hover {
+  background-color: #2563eb;
+}
+
+.menu-item.active {
+  background-color: #3b82f6;
+}
+
+
+/* sidebar css for studentDashboard */
+

@@ -13,11 +13,12 @@ import TeacherDashboard from "./pages/teacher/Dashboard";
 import AddStudent from "./pages/teacher/AddStudent";
 import LiveClass from "./pages/teacher/LiveClass";
 import AttendanceHistory from "./pages/teacher/AttendanceHistory";
+import TeacherLayout from "./layouts/TeacherLayouts";
 
 import StudentDashboard from "./pages/student/Dashboard";
 import StudentLiveClass from "./pages/student/LiveClass";
 import AttendanceHistoryforSTD from "./pages/student/AttendanceHistoryforSTD";
-import TeacherLayout from "./layouts/TeacherLayouts";
+import StudentLayout from "./layouts/StudentLayout";
 
 function App() {
   return (
@@ -26,40 +27,10 @@ function App() {
         <Navbar />
 
         <Routes>
-          {/* default redirect */}
-          {/* <Route path="/" element={<Navigate to="/login" />} /> */}
-
           {/* auth routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/auth/signup" element={<Signup />} />
-
-           
-          <Route
-            path="/teacher/class/:classId/live"
-            element={
-              <ProtectedRoute role="teacher">
-                <LiveClass />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/teacher/class/:classId/attendance"
-            element={
-              <ProtectedRoute role="teacher">
-                <AttendanceHistory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/teacher/class/:classId/students"
-            element={
-              <ProtectedRoute role="teacher">
-                <AddStudent />
-              </ProtectedRoute>
-            }
-          />
 
           <Route
             path="/teacher"
@@ -69,6 +40,7 @@ function App() {
               </ProtectedRoute>
             }
           >
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<TeacherDashboard />} />
             <Route path="class/:classId/live" element={<LiveClass />} />
             <Route
@@ -77,32 +49,23 @@ function App() {
             />
             <Route path="class/:classId/students" element={<AddStudent />} />
           </Route>
-          <Route
-            path="/student/class/:classId/live"
-            element={
-              <ProtectedRoute role="student">
-                <StudentLiveClass />
-              </ProtectedRoute>
-            }
-          />
 
           <Route
-            path="/student/attendance"
+            path="/student"
             element={
               <ProtectedRoute role="student">
-                <AttendanceHistoryforSTD />
+                <StudentLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="dashboard" />} />
+            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="class/:classId/live" element={<StudentLiveClass />} />
+            <Route path="attendance" element={<AttendanceHistoryforSTD />} />
+          </Route>
 
-          <Route
-            path="/student/dashboard"
-            element={
-              <ProtectedRoute role="student">
-                <StudentDashboard />
-              </ProtectedRoute>
-            }
-          />
+          {/* fallback ka route  */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
