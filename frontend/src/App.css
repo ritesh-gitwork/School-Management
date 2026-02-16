@@ -1,8 +1,12 @@
 .teacher-layout {
   display: flex;
-  height: calc(100vh - 70px); /* subtract navbar height */
-  border: none;
-  border-radius: 10px;
+  height: calc(100vh - 85px); /* subtract navbar height */
+  
+}
+
+.student-layout {
+  display: flex;
+  height: calc(100vh - 85px);
 }
 
 

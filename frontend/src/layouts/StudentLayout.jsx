@@ -13,15 +13,15 @@ const StudentLayout = () => {
     const menuItems = [
         {
             label:"Dashboard",
-            path:"/student/dashboard",
+            path:"/student/dashboard/classes",
         },
         {
             label:"Classes",
-            path:"classes",
+            path:"/student/dashboard/classes",
         },
         {
             label:"Attendence History",
-            path:"attendence"
+            path:"/student/dashboard/attendance"
         }
 
     ]

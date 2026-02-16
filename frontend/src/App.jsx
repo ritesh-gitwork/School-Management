@@ -13,7 +13,7 @@ import TeacherDashboard from "./pages/teacher/Dashboard";
 import AddStudent from "./pages/teacher/AddStudent";
 import LiveClass from "./pages/teacher/LiveClass";
 import AttendanceHistory from "./pages/teacher/AttendanceHistory";
-import TeacherLayout from "./layouts/TeacherLayouts";
+import TeacherLayout from "./layouts/TeacherLayout";
 
 import StudentDashboard from "./pages/student/Dashboard";
 import StudentLiveClass from "./pages/student/LiveClass";
@@ -59,7 +59,12 @@ function App() {
             }
           >
             <Route index element={<Navigate to="dashboard" />} />
-            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="dashboard">
+  <Route index element={<Navigate to="classes" />} />
+  <Route path="classes" element={<StudentDashboard />} />
+  <Route path="attendance" element={<StudentDashboard />} />
+</Route>
+
             <Route path="class/:classId/live" element={<StudentLiveClass />} />
             <Route path="attendance" element={<AttendanceHistoryforSTD />} />
           </Route>

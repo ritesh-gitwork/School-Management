@@ -1,0 +1,92 @@
+.student-container {
+  padding: 20px;
+}
+
+/* Top Row */
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.welcome-box {
+  background: #f1f5f9;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.join-class-btn {
+  padding: 8px 18px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.join-class-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Main Card */
+.main-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #e5e7eb;
+  cursor: pointer;
+}
+
+.tabs button.active {
+  background: #2563eb;
+  color: white;
+}
+
+/* Table */
+.table-area table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-area th,
+.table-area td {
+  padding: 12px;
+  text-align: left;
+}
+
+.table-area thead {
+  background: #f4f6f9;
+}
+
+.table-area tr:hover {
+  background-color: #f1f5ff;
+}
+
+/* Join Button */
+.table-btn {
+  padding: 6px 12px;
+  background: #10b981;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.table-btn:hover {
+  opacity: 0.85;
+}
