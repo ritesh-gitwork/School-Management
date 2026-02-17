@@ -49,7 +49,7 @@ const TeacherDashboard = () => {
     cls.className.toLowerCase().includes(search.toLowerCase())
   );
 
-  // 📄 Pagination
+  // pagination
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentClasses = filteredClasses.slice(indexOfFirst, indexOfLast);

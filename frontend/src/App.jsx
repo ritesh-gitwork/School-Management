@@ -40,14 +40,14 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="dashboard" />} />
+            {/* <Route index element={<Navigate to="dashboard" />} /> */}
             <Route path="dashboard" element={<TeacherDashboard />} />
             <Route path="class/:classId/live" element={<LiveClass />} />
             <Route
               path="class/:classId/attendance"
               element={<AttendanceHistory />}
             />
-            <Route path="class/:classId/students" element={<AddStudent />} />
+            <Route path="class/:classId" element={<AddStudent />} />
           </Route>
 
           <Route
@@ -60,17 +60,17 @@ function App() {
           >
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard">
-  <Route index element={<Navigate to="classes" />} />
-  <Route path="classes" element={<StudentDashboard />} />
-  <Route path="attendance" element={<StudentDashboard />} />
-</Route>
+              <Route index element={<Navigate to="classes" />} />
+              <Route path="classes" element={<StudentDashboard />} />
+              <Route path="attendance" element={<StudentDashboard />} />
+            </Route>
 
             <Route path="class/:classId/live" element={<StudentLiveClass />} />
             <Route path="attendance" element={<AttendanceHistoryforSTD />} />
           </Route>
 
           {/* fallback ka route  */}
-          <Route path="*" element={<Navigate to="/" />} />
+          {/* <Route path="*" element={<Navigate to="/" />} /> */}
         </Routes>
       </BrowserRouter>
     </AuthProvider>

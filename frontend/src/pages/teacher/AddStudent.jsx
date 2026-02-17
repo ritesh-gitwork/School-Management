@@ -4,55 +4,90 @@ import api from "../../api/axios";
 
 const AddStudent = () => {
   const { classId } = useParams();
-  const [studentId, setStudentId] = useState("");
+
   const [students, setStudents] = useState([]);
+  const [classStudents, setClassStudents] = useState([]);
+  const [requests,setRequest] = useState([])
 
-  const fetchClass = async () => {
-    const res = await api.get(`/class/${classId}`);
-    setStudents(res.data.data.studentsIds);
-  };
-
+  // fetch all students
   useEffect(() => {
-    fetchClass();
+    const fetchStudents = async () => {
+      const res = await api.get("/user/students");
+      setStudents(res.data.data);
+    };
+
+    fetchStudents();
   }, []);
 
-  const addStudent = async () => {
+  // Fetch students already in class
+  useEffect(() => {
+    const fetchClassStudents = async () => {
+      const res = await api.get(`/class/${classId}`);
+      setClassStudents(res.data.data.studentsIds);
+    };
+
+    fetchClassStudents();
+  }, [classId]);
+
+  const handleAddStudent = async (studentId) => {
     try {
       await api.post("/class/add-student", {
         classId,
         studentId,
       });
 
-      setStudentId("");
-      fetchClass();
-    } catch (err) {
-      alert(err.response?.data?.error || "Failed to add student");
+      alert("Student added successfully");
+
+      // refresh class students
+      const res = await api.get(`/class/${classId}`);
+      setClassStudents(res.data.data.studentsIds);
+
+    } catch (error) {
+      alert(error.response?.data?.error || "Failed to add");
     }
   };
 
   return (
-    <div>
-      <h2>Add Student</h2>
+    <div style={{ padding: 20 }}>
+      <h2>Add Students</h2>
 
-      <input
-        placeholder="Student ID"
-        value={studentId}
-        onChange={(e) => setStudentId(e.target.value)}
-      />
+      <table width="100%">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-      <button onClick={addStudent}>Add Student</button>
+        <tbody>
+          {students.map((student) => {
+            const alreadyAdded = classStudents.some(
+              (s) => s._id === student._id
+            );
 
-      <h3>Students in Class</h3>
-      <ul>
-        {students.map((s) => (
-          <li key={s._id}>
-            {s.name} ({s.email})
-          </li>
-        ))}
-      </ul>
+            return (
+              <tr key={student._id}>
+                <td>{student.name}</td>
+                <td>{student.email}</td>
+                <td>
+                  {alreadyAdded ? (
+                    <span style={{ color: "green" }}>Added</span>
+                  ) : (
+                    <button
+                      onClick={() => handleAddStudent(student._id)}
+                    >
+                      Add
+                    </button>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };
-
 
 export default AddStudent;

@@ -7,13 +7,23 @@ import "./StudentDashboard.css";
 const StudentDashboard = () => {
   const { user } = useAuth();
   const [classes, setClasses] = useState([]);
-  // const [activeTab, setActiveTab] = useState("classes");
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [requests, setRequests] = useState([]);
 
   const location = useLocation();
 
   const activeTab = location.pathname.includes("attendance")
     ? "attendance"
     : "classes";
+
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      const res = await api.get("/attendance/my");
+      setAttendanceData(res.data.data);
+    };
+
+    fetchAttendance();
+  }, []);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -27,6 +37,30 @@ const StudentDashboard = () => {
 
     fetchClasses();
   }, []);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const res = await api.get("/join/my");
+        setRequests(res.data.data);
+      } catch (error) {
+        console.log("failed to fetch request");
+      }
+    };
+    fetchRequests();
+  }, []);
+
+  const requestJoin = async (classId) => {
+    try {
+      await api.post("/join/join", { classId });
+      alert("Request Send");
+
+      const res =await api.get("/join/my")
+      setRequests(res.data.data) 
+    } catch (error) {
+      alert("Already Requested");
+    }
+  };
 
   return (
     <div className="student-container">
@@ -45,7 +79,7 @@ const StudentDashboard = () => {
             to="/student/dashboard/classes"
             className={activeTab === "classes" ? "active" : ""}
           >
-            <button >Classes</button>
+            <button>Classes</button>
           </Link>
 
           <Link
@@ -65,24 +99,36 @@ const StudentDashboard = () => {
               <thead>
                 <tr>
                   <th>Class Name</th>
-                  <th>Join</th>
+                  <th>Request</th>
+                  <th>Status</th>
                 </tr>
               </thead>
 
               <tbody>
-                {classes.map((cls) => (
-                  <tr key={cls._id}>
-                    <td>{cls.className}</td>
-                    <td>
-                      <Link
-                        to={`/student/class/${cls._id}/live`}
-                        className="table-btn"
-                      >
-                        Join
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {classes.map((cls) => {
+                  const request = requests.find(
+                    (r) => r.classId._id === cls._id,
+                  );
+
+                  return (
+                    <tr key={cls._id}>
+                      <td>{cls.className}</td>
+
+                      <td>
+                        {!request && (
+                          <button
+                            onClick={() => requestJoin(cls._id)}
+                            className="table-btn"
+                          >
+                            Request
+                          </button>
+                        )}
+                      </td>
+
+                      <td>{request ? request.status : "Not Requested"}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -97,12 +143,18 @@ const StudentDashboard = () => {
               </thead>
 
               <tbody>
-                {classes.map((cls) => (
-                  <tr key={cls._id}>
-                    <td>{cls.className}</td>
-                    <td>--%</td>
-                  </tr>
-                ))}
+                {classes.map((cls) => {
+                  const attendance = attendanceData.find(
+                    (item) => item.className === cls.className,
+                  );
+
+                  return (
+                    <tr key={cls._id}>
+                      <td>{cls.className}</td>
+                      <td>{attendance ? `${attendance.percentage}%` : "0%"}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

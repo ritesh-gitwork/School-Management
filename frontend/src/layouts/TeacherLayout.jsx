@@ -11,7 +11,7 @@ const TeacherLayout = () => {
 
   const menuItems = [
     { label: "Dashboard", path: "/teacher/dashboard" },
-    { label: "Add Student", path: "/teacher/add-student" },
+    { label: "Add Student", path: "/add-student" },
     { label: "Create Class", path: "/teacher/create-class" },
     { label: "Attendance History", path: "/teacher/attendance" },
   ];

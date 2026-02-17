@@ -153,3 +153,20 @@ export const getClassById = async (req, res) => {
   });
 };
 
+export const getAllStudents = async (req, res) => {
+  try {
+    const students = await User.find({ role: "student" })
+      .select("name email");
+
+    res.status(200).json({
+      success: true,
+      data: students,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch students",
+    });
+  }
+};
+

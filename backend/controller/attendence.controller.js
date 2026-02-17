@@ -127,14 +127,57 @@ export const getAttendanceHistory = async (req, res) => {
 
 
 export const getMyAttendance = async (req, res) => {
-  const records = await Attendance.find({
-    studentId: req.user.id,
-  })
-    .populate("classId", "className")
-    .sort({ createdAt: -1 });
+  try {
+    const studentId = req.user.id;
 
-  res.json({
-    success: true,
-    data: records,
-  });
+    const records = await Attendance.find({
+      studentId,
+    }).populate("classId", "className");
+
+    const attendanceMap = {};
+
+    records.forEach((record) => {
+      const classId = record.classId._id.toString();
+      const className = record.classId.className;
+
+      if (!attendanceMap[classId]) {
+        attendanceMap[classId] = {
+          className,
+          total: 0,
+          present: 0,
+        };
+      }
+
+      attendanceMap[classId].total++;
+
+      if (record.status === "present") {
+        attendanceMap[classId].present++;
+      }
+    });
+
+    const result = Object.values(attendanceMap).map((cls) => {
+      const percentage =
+        cls.total === 0
+          ? 0
+          : ((cls.present / cls.total) * 100).toFixed(1);
+
+      return {
+        
+        className: cls.className,
+        percentage,
+      };
+    });
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Attendance % error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to calculate attendance",
+    });
+  }
 };
+

@@ -4,7 +4,7 @@ import { teacherOnly } from "../middlewares/role.middleware.js";
 import { validate } from "../middlewares/validate.middleware.js";
 import { attendanceSchema } from "../validators/attendence.schema.js";
 import {
-    getAttendanceHistory,
+  getAttendanceHistory,
   getAttendenceByClass,
   getMyAttendance,
   markAttendance,
@@ -19,7 +19,7 @@ router.post(
   validate(attendanceSchema),
   markAttendance,
 );
-router.get("/class/:classId", verifyMiddleware, getAttendenceByClass);
+// router.get("/class/:classId", verifyMiddleware, getAttendenceByClass);
 router.get(
   "/class/:classId",
   verifyMiddleware,
@@ -27,11 +27,6 @@ router.get(
   getAttendanceHistory,
 );
 
-router.get(
-  "/me",
-  verifyMiddleware,
-  getMyAttendance
-);
-
+router.get("/my", verifyMiddleware, getMyAttendance);
 
 export default router;
