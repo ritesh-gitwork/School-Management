@@ -33,7 +33,7 @@ const TeacherDashboard = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    const socket = new WebSocket(`wss://https://school-management-vpgs.onrender.com?token=${token}`);
+    const socket = new WebSocket(`wss://school-management-vpgs.onrender.com?token=${token}`);
 
     socketRef.current = socket;
 
