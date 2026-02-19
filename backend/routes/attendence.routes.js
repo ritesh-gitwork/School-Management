@@ -7,6 +7,7 @@ import {
   getAttendanceHistory,
   getAttendenceByClass,
   getMyAttendance,
+  getTeacherAttendanceOverview,
   markAttendance,
 } from "../controller/attendence.controller.js";
 
@@ -26,6 +27,16 @@ router.get(
   teacherOnly,
   getAttendanceHistory,
 );
+
+router.get(
+  "/teacher-overview",
+  verifyMiddleware,
+  teacherOnly,
+  getTeacherAttendanceOverview
+);
+
+
+
 
 router.get("/my", verifyMiddleware, getMyAttendance);
 

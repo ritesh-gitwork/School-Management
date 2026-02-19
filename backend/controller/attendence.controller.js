@@ -1,11 +1,11 @@
-import Attendance from "../models/attendence.model.js";
+import Attendence from "../models/attendence.model.js";
 import Class from "../models/class.model.js";
 
+// ================= MARK ATTENDANCE =================
 export const markAttendance = async (req, res) => {
   try {
     const { classId, studentId, status } = req.body;
 
-    // 1. class check
     const classData = await Class.findById(classId);
     if (!classData) {
       return res.status(404).json({
@@ -14,17 +14,15 @@ export const markAttendance = async (req, res) => {
       });
     }
 
-    // 2. ownership check
     if (classData.teacherId.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
-        error: "Forbidden, not class teacher",
+        error: "Forbidden",
       });
     }
 
-    // 3. student belongs to class?
     const isStudentInClass = classData.studentsIds.some(
-      (id) => id.toString() === studentId
+      (id) => id.toString() === studentId,
     );
 
     if (!isStudentInClass) {
@@ -34,8 +32,7 @@ export const markAttendance = async (req, res) => {
       });
     }
 
-    // 4️. save attendance
-    const attendance = await Attendance.create({
+    const attendance = await Attendence.create({
       classId,
       studentId,
       status,
@@ -46,7 +43,7 @@ export const markAttendance = async (req, res) => {
       data: attendance,
     });
   } catch (error) {
-    console.error("Attendance error:", error);
+    console.error("Mark attendance error:", error);
     return res.status(500).json({
       success: false,
       error: "Failed to mark attendance",
@@ -54,83 +51,113 @@ export const markAttendance = async (req, res) => {
   }
 };
 
-export const getAttendenceByClass = async(req,res)=>{
+// ================= GET CLASS ATTENDANCE (Detailed List) =================
+export const getAttendenceByClass = async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { id, role } = req.user;
 
-    try {
-        const {classId} = req.params;
-        const{id,role} = req.user;
+    const classData = await Class.findById(classId);
 
-        // 1. Class check
-        const classData = await Class.findById(classId)
+    if (!classData) {
+      return res.status(404).json({
+        success: false,
+        error: "Class not found",
+      });
+    }
 
-        if(!classData){
-            return res.status(404).json({
-                status:false,
-                error:"class not found"
-            })
-        }
-
-        // 2. role based access
-
-        if(role=== "teacher"){
-            if(classData.teacherId.toString() !==id){
-                return res.status(403).json({
-                success: false,
-                error: "Forbidden, not class teacher",
-                });
-            }
-        }
-
-        let attendance;
-
-        if(role=== "teacher"){
-          attendance =await Attendance.find({classId}).populate("studentId","name,email")
-        }
-        else{
-          attendance = await Attendance.find({
-            classId,
-            studentId:id,
-          })
-        }
-
-        return res.status(200).json({
-        success: true,
-        data: attendance,
+    if (role === "teacher") {
+      if (classData.teacherId.toString() !== id) {
+        return res.status(403).json({
+          success: false,
+          error: "Not your class",
         });
+      }
+    }
 
+    let attendance;
 
-    } catch (error) {
-      console.error("Get attendance error:", error);
+    if (role === "teacher") {
+      attendance = await Attendence.find({ classId })
+        .populate("studentId", "name, email")
+        .sort({ createdAt: -1 });
+    } else {
+      attendance = await Attendence.find({
+        classId,
+        studentId: id,
+      }).sort({ createdAt: -1 });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: attendance,
+    });
+  } catch (error) {
+    console.error("Get attendance error:", error);
     return res.status(500).json({
       success: false,
       error: "Failed to fetch attendance",
     });
-  
-        
-    }
-    
-
-}
-
-export const getAttendanceHistory = async (req, res) => {
-  const { classId } = req.params;
-
-  const records = await Attendance.find({ classId })
-    .populate("studentId", "name email")
-    .sort({ createdAt: -1 });
-
-  res.status(200).json({
-    success: true,
-    data: records,
-  });
+  }
 };
 
+// ================= SUBJECT-WISE HISTORY (Grouped By Date) =================
+export const getAttendanceHistory = async (req, res) => {
+  try {
+    const { classId } = req.params;
 
+    const records = await Attendence.find({ classId });
+
+    const grouped = {};
+
+    records.forEach((rec) => {
+      // ✅ Safe date handling
+      const rawDate = rec.createdAt || rec.date;
+
+      if (!rawDate) return; // skip invalid record
+
+      // const date = new Date(rawDate).toISOString().split("T")[0];
+      const date = rec.date
+        ? rec.date.toISOString().split("T")[0]
+        : new Date(rec.createdAt).toISOString().split("T")[0];
+
+      if (!grouped[date]) {
+        grouped[date] = {
+          date,
+          totalStudents: 0,
+          presentCount: 0,
+          absentCount: 0,
+        };
+      }
+
+      grouped[date].totalStudents++;
+
+      if (rec.status === "present") {
+        grouped[date].presentCount++;
+      } else {
+        grouped[date].absentCount++;
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: Object.values(grouped),
+    });
+  } catch (error) {
+    console.error("History error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to fetch history",
+    });
+  }
+};
+
+// ================= STUDENT PERSONAL ATTENDANCE % =================
 export const getMyAttendance = async (req, res) => {
   try {
     const studentId = req.user.id;
 
-    const records = await Attendance.find({
+    const records = await Attendence.find({
       studentId,
     }).populate("classId", "className");
 
@@ -155,29 +182,64 @@ export const getMyAttendance = async (req, res) => {
       }
     });
 
-    const result = Object.values(attendanceMap).map((cls) => {
-      const percentage =
-        cls.total === 0
-          ? 0
-          : ((cls.present / cls.total) * 100).toFixed(1);
+    const result = Object.values(attendanceMap).map((cls) => ({
+      className: cls.className,
+      percentage:
+        cls.total === 0 ? 0 : ((cls.present / cls.total) * 100).toFixed(1),
+    }));
 
-      return {
-        
-        className: cls.className,
-        percentage,
-      };
-    });
-
-    res.json({
+    return res.status(200).json({
       success: true,
       data: result,
     });
   } catch (error) {
-    console.error("Attendance % error:", error);
-    res.status(500).json({
+    console.error("Student % error:", error);
+    return res.status(500).json({
       success: false,
       error: "Failed to calculate attendance",
     });
   }
 };
 
+// ================= TEACHER OVERVIEW =================
+export const getTeacherAttendanceOverview = async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+
+    const classes = await Class.find({ teacherId });
+
+    const overview = [];
+
+    for (const cls of classes) {
+      const records = await Attendence.find({
+        classId: cls._id,
+      });
+
+      const totalSessions = records.length;
+      const presentCount = records.filter((r) => r.status === "present").length;
+
+      const percentage =
+        totalSessions === 0
+          ? 0
+          : ((presentCount / totalSessions) * 100).toFixed(1);
+
+      overview.push({
+        classId: cls._id,
+        className: cls.className,
+        totalSessions,
+        percentage,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: overview,
+    });
+  } catch (error) {
+    console.error("Overview error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to fetch overview",
+    });
+  }
+};

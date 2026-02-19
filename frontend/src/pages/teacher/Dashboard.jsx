@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../api/axios";
 import { Link } from "react-router-dom";
 import "./TeacherDashboard.css";
@@ -10,10 +10,11 @@ const TeacherDashboard = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  
 
+  const socketRef = useRef(null);
   const itemsPerPage = 5;
 
+  // ✅ Fetch Classes
   const fetchClasses = async () => {
     try {
       const res = await api.get("/class/getclass");
@@ -27,6 +28,50 @@ const TeacherDashboard = () => {
     fetchClasses();
   }, []);
 
+  // ✅ WebSocket Connection
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const socket = new WebSocket(`ws://localhost:8080?token=${token}`);
+
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      console.log("✅ WS Connected");
+    };
+
+    socketRef.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("WS Message:", data);
+
+      if (data.type === "CLASS_STATUS") {
+        setClasses((prev) =>
+          prev.map((cls) => {
+            if (String(cls._id) === String(data.classId)) {
+              return {
+                ...cls,
+                isLive: data.isLive,
+              };
+            }
+            return cls;
+          }),
+        );
+      }
+    };
+
+    socket.onerror = (err) => {
+      console.log("❌ WS Error", err);
+    };
+
+    socket.onclose = () => {
+      console.log("🔴 WS Closed");
+    };
+
+    return () => socket.close();
+  }, []);
+
+  // ✅ Create Class
   const createClass = async () => {
     if (!className) return alert("Class name required");
 
@@ -35,8 +80,6 @@ const TeacherDashboard = () => {
       await api.post("/class/create-class", { className });
       setClassName("");
       fetchClasses();
-      console.log("class nhi create ",className);
-      
     } catch (err) {
       alert(err.response?.data?.error || "Class already exists");
     } finally {
@@ -44,12 +87,24 @@ const TeacherDashboard = () => {
     }
   };
 
+  // ✅ Start / Stop via WebSocket
+  const handleToggleLive = (classId, isLive) => {
+    if (!socketRef.current) return;
+
+    socketRef.current.send(
+      JSON.stringify({
+        type: isLive ? "STOP_CLASS" : "START_CLASS",
+        classId,
+      }),
+    );
+  };
+
   // 🔎 Search Filter
   const filteredClasses = classes.filter((cls) =>
-    cls.className.toLowerCase().includes(search.toLowerCase())
+    cls.className.toLowerCase().includes(search.toLowerCase()),
   );
 
-  // pagination
+  // 📄 Pagination
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentClasses = filteredClasses.slice(indexOfFirst, indexOfLast);
@@ -57,10 +112,8 @@ const TeacherDashboard = () => {
 
   return (
     <div className="dashboard-container">
-
-      {/* Top Section */}
       <div className="dashboard-header">
-        <NameHeader/>
+        <NameHeader />
 
         <div className="add-class">
           <input
@@ -102,8 +155,13 @@ const TeacherDashboard = () => {
                 <td>{cls.className}</td>
                 <td>{cls.studentsIds.length}</td>
 
+                {/* ✅ Dynamic Status */}
                 <td>
-                  <span className="badge active">Active</span>
+                  <span
+                    className={`badge ${cls.isLive ? "active" : "inactive"}`}
+                  >
+                    {cls.isLive ? "Active" : "Inactive"}
+                  </span>
                 </td>
 
                 <td>
@@ -115,13 +173,14 @@ const TeacherDashboard = () => {
                   </Link>
                 </td>
 
+                {/* ✅ Start / Stop */}
                 <td>
-                  <Link
-                    to={`/teacher/class/${cls._id}/live`}
-                    className="btn live"
+                  <button
+                    onClick={() => handleToggleLive(cls._id, cls.isLive)}
+                    className={`btn ${cls.isLive ? "stop" : "live"}`}
                   >
-                    Start
-                  </Link>
+                    {cls.isLive ? "Stop" : "Start"}
+                  </button>
                 </td>
               </tr>
             ))}

@@ -148,3 +148,21 @@ tbody tr:hover {
 }
 
 
+.badge.active {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+.badge.inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+.btn.stop {
+  background-color: #ef4444;
+  color: white;
+}

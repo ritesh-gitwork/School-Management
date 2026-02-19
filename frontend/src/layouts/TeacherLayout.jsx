@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
-
 import "../App.css";
 
 const TeacherLayout = () => {
@@ -9,19 +8,11 @@ const TeacherLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const menuItems = [
-    { label: "Dashboard", path: "/teacher/dashboard" },
-    { label: "Add Student", path: "/add-student" },
-    { label: "Create Class", path: "/teacher/create-class" },
-    { label: "Attendance History", path: "/teacher/attendance" },
-  ];
-
   return (
     <div className="teacher-layout">
       <div className={`sidebar ${collapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
           {!collapsed && <h3>Teacher</h3>}
-
           <button
             className="toggle-btn"
             onClick={() => setCollapsed(!collapsed)}
@@ -30,19 +21,34 @@ const TeacherLayout = () => {
           </button>
         </div>
 
-        {/* Menu */}
-        <div className="menu">
-          {menuItems.map((item, index) => (
-            <div
-              key={index}
-              className={`menu-item ${
-                location.pathname === item.path ? "active" : ""
-              }`}
-              onClick={() => navigate(item.path)}
-            >
-              {!collapsed && item.label}
-            </div>
-          ))}
+        {/* Dashboard */}
+        {/* <div
+          className={`menu-item ${
+            location.pathname === "/teacher/dashboard" ? "active" : ""
+          }`}
+          onClick={() => navigate("/teacher/dashboard")}
+        >
+          {!collapsed && "Dashboard"}
+        </div> */}
+
+        {/* Classes */}
+        <div
+          className={`menu-item ${
+            location.pathname.includes("/teacher/dashboard") ? "active" : ""
+          }`}
+          onClick={() => navigate("/teacher/dashboard")}
+        >
+          {!collapsed && "Class Overview"}
+        </div>
+
+        {/* Attendance History */}
+        <div
+          className={`menu-item ${
+            location.pathname.includes("/attendance") ? "active" : ""
+          }`}
+          onClick={() => navigate("/teacher/attendance")}
+        >
+          {!collapsed && "Attendance History"}
         </div>
       </div>
 

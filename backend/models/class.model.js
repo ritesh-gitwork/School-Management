@@ -19,6 +19,10 @@ const classSchema = new Schema(
         // required: true,
       },
     ],
+    isLive:{
+      type:Boolean,
+      default:false
+    }
   },
   {
     timestamps: true,

@@ -40,14 +40,19 @@ function App() {
               </ProtectedRoute>
             }
           >
-            {/* <Route index element={<Navigate to="dashboard" />} /> */}
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<TeacherDashboard />} />
+
+             <Route path="class/:classId/students" element={<AddStudent />} />
+
             <Route path="class/:classId/live" element={<LiveClass />} />
-            <Route
-              path="class/:classId/attendance"
-              element={<AttendanceHistory />}
-            />
-            <Route path="class/:classId" element={<AddStudent />} />
+
+            <Route path="class/:classId/attendance" element={<AttendanceHistory />}/>
+            <Route path="attendance" element={<AttendanceHistory />} />
+
+
+            {/* <Route path="class/:classId" element={<AddStudent />} /> */}
+
           </Route>
 
           <Route

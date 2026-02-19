@@ -5,8 +5,8 @@ import Attendence from "./models/attendence.model.js";
 import Class from "./models/class.model.js";
 import User from "./models/user.model.js";
 
-let isClassLive = false;
-let liveClassTeacherId = null;
+// let isClassLive = false;
+// let liveClassTeacherId = null;
 const presentStudents = new Set(); // studentId strings
 
 let wss;
@@ -27,6 +27,8 @@ export const initWebsocket = (server) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       ws.user = decoded; // { id, role }
 
+      // ws.user = { id:"test", role:"teacher"}
+
       console.log("WS connected:", ws.user);
 
       ws.on("message", async (message) => {
@@ -46,26 +48,41 @@ export const initWebsocket = (server) => {
           // start class teacher only
           if (data.type === "START_CLASS") {
             if (ws.user.role !== "teacher") {
+              ws.send(JSON.stringify({ success: false, error: "Forbidden" }));
+              return;
+            }
+
+            const { classId } = data;
+
+            const classData = await Class.findById(classId);
+
+            if (!classData) {
               ws.send(
-                JSON.stringify({
-                  success: false,
-                  error: "Forbidden, teacher access required",
-                }),
+                JSON.stringify({ success: false, error: "Class not found" }),
               );
               return;
             }
 
-            isClassLive = true;
-            liveClassTeacherId = ws.user.id;
+            if (classData.teacherId.toString() !== ws.user.id) {
+              ws.send(
+                JSON.stringify({ success: false, error: "Not class teacher" }),
+              );
+              return;
+            }
 
-            // console.log(" Class started by:", ws.user.id);
+            classData.isLive = true;
+            await classData.save();
 
+            console.log("Class started:", classId);
+
+            // broadcast
             wss.clients.forEach((client) => {
               if (client.readyState === WebSocket.OPEN) {
                 client.send(
                   JSON.stringify({
-                    type: "CLASS_STARTED",
-                    teacherId: ws.user.id,
+                    type: "CLASS_STATUS",
+                    classId,
+                    isLive:true
                   }),
                 );
               }
@@ -75,39 +92,34 @@ export const initWebsocket = (server) => {
           }
 
           //  stop class teacher only and save attendence
-          
+
           // ================= STOP CLASS =================
           if (data.type === "STOP_CLASS") {
-            // ✅ 1. AUTH CHECK FIRST
-            if (
-              ws.user.role !== "teacher" ||
-              ws.user.id !== liveClassTeacherId
-            ) {
-              ws.send(
-                JSON.stringify({
-                  success: false,
-                  error: "Forbidden, not the same teacher",
-                }),
-              );
+            if (ws.user.role !== "teacher") {
+              ws.send(JSON.stringify({ success: false, error: "Forbidden" }));
               return;
             }
 
-            // ✅ 2. FETCH CLASS
-            const classData = await Class.findOne({
-              teacherId: ws.user.id,
-            }).populate("studentsIds");
+            const { classId } = data;
+
+            const classData =
+              await Class.findById(classId).populate("studentsIds");
 
             if (!classData) {
               ws.send(
-                JSON.stringify({
-                  success: false,
-                  error: "Class not found",
-                }),
+                JSON.stringify({ success: false, error: "Class not found" }),
               );
               return;
             }
 
-            // ✅ 3. PREPARE ATTENDANCE
+            if (classData.teacherId.toString() !== ws.user.id) {
+              ws.send(
+                JSON.stringify({ success: false, error: "Not class teacher" }),
+              );
+              return;
+            }
+
+            // save attendance
             const attendanceRecords = classData.studentsIds.map((student) => ({
               classId: classData._id,
               studentId: student._id,
@@ -116,22 +128,22 @@ export const initWebsocket = (server) => {
                 : "absent",
             }));
 
-            // ✅ 4. SAVE ONCE
             await Attendence.insertMany(attendanceRecords);
 
-            console.log("Attendance saved to DB");
+            classData.isLive = false;
+            await classData.save();
 
-            // ✅ 5. RESET STATE
-            isClassLive = false;
-            liveClassTeacherId = null;
             presentStudents.clear();
 
-            // ✅ 6. BROADCAST STOP
+            console.log("Class stopped:", classId);
+
             wss.clients.forEach((client) => {
               if (client.readyState === WebSocket.OPEN) {
                 client.send(
                   JSON.stringify({
-                    type: "CLASS_STOPPED",
+                    type: "CLASS_STATUS",
+                    classId,
+                    isLive:false
                   }),
                 );
               }
@@ -142,12 +154,13 @@ export const initWebsocket = (server) => {
 
           //  mark present (student only)
           if (data.type === "MARK_PRESENT") {
-            if (!isClassLive) {
+            const { classId } = data;
+
+            const classData = await Class.findById(classId);
+
+            if (!classData?.isLive) {
               ws.send(
-                JSON.stringify({
-                  success: false,
-                  error: "Class is not live",
-                }),
+                JSON.stringify({ success: false, error: "Class not live" }),
               );
               return;
             }
@@ -156,46 +169,20 @@ export const initWebsocket = (server) => {
               ws.send(
                 JSON.stringify({
                   success: false,
-                  error: "Only students can mark attendance",
+                  error: "Only students allowed",
                 }),
               );
               return;
             }
 
-            // mark present
             presentStudents.add(ws.user.id);
 
-            // ack to student
             ws.send(
               JSON.stringify({
                 success: true,
                 type: "PRESENT_MARKED",
               }),
             );
-
-            // fetch student name and email
-            const student = await User.findById(ws.user.id).select(
-              "name email",
-            );
-
-            // notify teacher(s)
-            wss.clients.forEach((client) => {
-              if (
-                client.readyState === WebSocket.OPEN &&
-                client.user?.role === "teacher"
-              ) {
-                client.send(
-                  JSON.stringify({
-                    type: "STUDENT_PRESENT",
-                    student: {
-                      id: student.id,
-                      name: student.name,
-                      email: student.email,
-                    },
-                  }),
-                );
-              }
-            });
 
             return;
           }

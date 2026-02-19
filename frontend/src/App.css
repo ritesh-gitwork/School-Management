@@ -175,3 +175,42 @@
 
 /* sidebar css for studentDashboard */
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.sidebar-subtitle {
+  padding: 10px 20px;
+  font-size: 12px;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.menu-item.active {
+  background-color: #2563eb;
+  font-weight: 600;
+}
+.menu-title {
+  padding: 10px 20px;
+  font-size: 14px;
+  opacity: 0.7;
+}
